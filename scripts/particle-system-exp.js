@@ -63,7 +63,7 @@ function particleSystem(spec, graphics) {
 		var removeMe = [],
 			value,
 			particle,
-			rotationRate = .8;
+			rotationRate = 0;
 
 		
 		for (value in particles) {

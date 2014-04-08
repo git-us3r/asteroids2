@@ -124,14 +124,14 @@ var ExplosionFactory = (function(){
 
 			return {
 				image : _image,
-				width : 30,
-				height : 30,
+				width : 300,
+				height : 300,
 				center : _center,
-				speed_std : 30,
-				speed_mean : 3,
-				lifetime_mean : 2,
+				speed_std : 3,
+				speed_mean : 800,
+				lifetime_mean : .9,
 				lifetime_std : 1,
-				genRate : 2
+				genRate : 3
 			};
 		}
 
@@ -214,18 +214,21 @@ var ExplosionFactory = (function(){
 
 
 	// stores images.
-	var ImageSet = function(_fire, _smoke, _plasma, _debryBase, _debryShip, _debryEnemyShip, _debryMissiles){
+	function ImageSet(_fire, _smoke, _plasma, _debryBase, _debryShip, _debryEnemyShip, _debryMissiles){
 
+		
 		return {
+			
 			fire : _fire || null,
-			smoke : _smoke || null,
-			plasma : _plasma || null,
+			smoke :  _smoke || null,
+			plasma :  _plasma || null,
 			debryBase : _debryBase || null,
-			debryShip : _debryShip || null,
+			debryShip :  _debryShip || null,
 			debryEnemyShip : _debryEnemyShip || null,
-			debryMissiles : _debryMissiles || null
-		};
-	};
+			debryMissiles :  _debryMissiles || null
+		
+		}
+	}
 
 
 
@@ -275,10 +278,10 @@ var ExplosionFactory = (function(){
 				xparam = null,
 				exp = null;
 
-			pics.push(ImageFactory(ImageType.debryShip, _ImageSet[ImageType.debryShip], _center));
-			pics.push(ImageFactory(ImageType.debryMissiles, _ImageSet[ImageType.debryMissiles], _center));
+			pics.push(ImageFactory(ImageType.debryShip, _ImageSet.debryShip, _center));
+			//pics.push(ImageFactory(ImageType.debryMissiles, _ImageSet[ImageType.debryMissiles], _center));
 
-			xparam = Explosion.explosionParameters(pics, _graphics, _durations);
+			xparam = Explosion.explosionParameters(pics, _graphics, _duration);
 			exp = Explosion.setExplosion(xparam);
 
 			return exp;
@@ -292,8 +295,8 @@ var ExplosionFactory = (function(){
 				xparam = null,
 				exp = null;
 
-			pics.push(ImageFactory(ImageType.debryMissiles, _ImageSet[ImageType.debryMissiles], _center));
-			xparam = Explosion.explosionParameters(pics, _graphics, _durations);
+			pics.push(ImageFactory(ImageType.debryMissiles, _ImageSet.debryMissiles, _center));
+			xparam = Explosion.explosionParameters(pics, _graphics, _duration);
 			exp = Explosion.setExplosion(xparam);
 
 			return exp;
@@ -308,8 +311,8 @@ var ExplosionFactory = (function(){
 				xparam = null,
 				exp = null;
 
-			pics.push(ImageFactory(ImageType.debryMissiles, _ImageSet[ImageType.debryMissiles], _center));
-			xparam = Explosion.explosionParameters(pics, _graphics, _durations);
+			pics.push(ImageFactory(ImageType.debryMissiles, _ImageSet.debryMissiles, _center));
+			xparam = Explosion.explosionParameters(pics, _graphics, _duration);
 			exp = Explosion.setExplosion(xparam);
 
 			return exp;

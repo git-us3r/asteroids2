@@ -12,17 +12,63 @@ EXPD.Entities = {
 };
 
 
+EXPD.Flash = {
+
+	baseFlash : "BASE_FLASH",
+	friendlyShipExplosionFlash : "FRIENDLY_EXP_FLASH"
+
+};
+
+
 
 // Eventually, all configuration paramters should be moved
 // here. Particularly, those concerning the properties of 
 // the entities; e.g., asteroid speed, missile speed, missile firing rate, etc.
 EXPD.GameParameters = {
 
+	shipIsSafe : true,
+	safetyPeriodDurationLimit : 3,
+	safetyPeriodCountDown : -99,
+
+	maxLives : 3,
+	currentLife : 3,
+
 	firingRate : 5,
 	timeSinceLastMissile : 2.998,
+
+	numberOfLargeAsteroids : 5,
+	sizeOfLargeAsteroids : 80,
+	large2MedRatio : 3,
+
+	numberOfMedAsteroids : 4,
+	sizeOfMedAsteroids : 50,
+	med2Smallratio : 4,
+
+	sizeOfSmallAsteroids : 20,
+
 	flashUniqueId : 0
 };
 
+
+EXPD.gameOver = function(){
+
+	// TODO
+
+};
+
+
+
+
+EXPD.makeShipSafe = function(){
+
+	// TODO
+
+	EXPD.GameParameters.shipIsSafe = true;
+	EXPD.GameParameters.safetyPeriodCountDown = EXPD.GameParameters.safetyPeriodDurationLimit;
+
+	// NOTE: EXPD.update will validate safety period and terminate it when appropriate.
+
+}
 
 
 
@@ -127,38 +173,20 @@ EXPD.initialize = function(){
 
 
 
+	EXPD.asteroids = {};
+
 
 	// Only 4 for now ... args can be used to changed that.
-	(function initializeAsteroids(numberOfAsteroids){
+	(function initializeAsteroids(){	
 
-		EXPD.asteroids = {};
+		// Initialize Large Asteroids.
+		for (var i = 0; i < EXPD.GameParameters.numberOfLargeAsteroids; i++){
 
-		for (var i = 0; i < numberOfAsteroids; i++){
-
-			//Asteroid(_image, _width, _height, _center, _rotation)
-			var image = EXPD.images['images/cartoonishBigRockBlue.png'],
-				width = 50,
-				height = 50,
-				//
-				// Random is bad: what if there is a collision at time t = 0?
-				// TODO: fix.
-				center = {
-					x: Random.nextRange(width, EXPD.canvas.width - width), 
-					y: Random.nextRange(height, EXPD.canvas.height - height)
-				},
-				rotation = 0,
-				rotationRate = 0.014,
-				speed = Random.nextGaussian(50, 20),
-				direction = Vector2d.vectorFromAngle(Random.nextGaussian(Math.PI, Math.PI)),
-				visible = true;
-
-			var	ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
-			ast.type = EXPD.Entities.ASTEROID_MED;
-				
-
+			var ast = EXPD.setAsteroid(EXPD.Entities.ASTEROID_LRG);
 			EXPD.asteroids[ast.id] = ast;
 		}
-	}(4));
+	}());
+
 
 
 	(function initializeKeyboard(){
@@ -177,6 +205,9 @@ EXPD.initialize = function(){
 	// set up friendly missles object
 	EXPD.friendlyMissles = {};
 
+	// set up flashes
+	EXPD.flashes = {};
+
 
 	// READY?, SET?, GO!
 	EXPD.elapsedTime = 0;
@@ -187,38 +218,158 @@ EXPD.initialize = function(){
 
 
 
-EXPD.flashes = {};
+EXPD.setAsteroid = function (entitySize){
 
-EXPD.setExplosionFlash = function(args) {
+	switch(entitySize){
 
-	var id = EXPD.GameParameters.flashUniqueId;
-	EXPD.flashes.id = Spec.create(EXPD.images['images/plasmaCenterFlash.png'], 400, 400, args.midpoint, 0);
-	EXPD.GameParameters.flashUniqueId++;
+		case EXPD.Entities.ASTEROID_LRG:
+			//Asteroid(_image, _width, _height, _center, _rotation)
+			var image = EXPD.images['images/cartoonishBigRockPurp.png'],
+				width = EXPD.GameParameters.sizeOfLargeAsteroids,
+				height = EXPD.GameParameters.sizeOfLargeAsteroids,
+				//
+				// Random is bad: what if there is a collision at time t = 0?
+				// TODO: fix.
+				center = {
+					x: Random.nextRange(width, EXPD.canvas.width - width), 
+					y: Random.nextRange(height, EXPD.canvas.height - height)
+				},
+				rotation = 0,
+				rotationRate = 0.014,
+				speed = Random.nextGaussian(50, 20),
+				direction = Vector2d.vectorFromAngle(Random.nextGaussian(Math.PI, Math.PI)),
+				visible = true;
+
+			var	ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
+			ast.type = EXPD.Entities.ASTEROID_LRG;
+			return ast;
+			break;				// superfluous
+
+		case EXPD.Entities.ASTEROID_MED:
+			//Asteroid(_image, _width, _height, _center, _rotation)
+			var image = EXPD.images['images/cartoonishMedRockPurp.png'],
+				width = EXPD.GameParameters.sizeOfMedAsteroids,
+				height = EXPD.GameParameters.sizeOfMedAsteroids,
+				//
+				// Random is bad: what if there is a collision at time t = 0?
+				// TODO: fix.
+				center = {
+					x: Random.nextRange(width, EXPD.canvas.width - width), 
+					y: Random.nextRange(height, EXPD.canvas.height - height)
+				},
+				rotation = 0,
+				rotationRate = 0.014,
+				speed = Random.nextGaussian(50, 20),
+				direction = Vector2d.vectorFromAngle(Random.nextGaussian(Math.PI, Math.PI)),
+				visible = true;
+
+			var	ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
+			ast.type = EXPD.Entities.ASTEROID_LRG;
+			return ast;
+			break;
+
+		case EXPD.Entities.ASTEROID_SML:
+			//Asteroid(_image, _width, _height, _center, _rotation)
+			var image = EXPD.images['images/cartoonishSmallRockPurp.png'],
+				width = EXPD.GameParameters.sizeOfSmallAsteroids,
+				height = EXPD.GameParameters.sizeOfSmallAsteroids,
+				//
+				// Random is bad: what if there is a collision at time t = 0?
+				// TODO: fix.
+				center = {
+					x: Random.nextRange(width, EXPD.canvas.width - width), 
+					y: Random.nextRange(height, EXPD.canvas.height - height)
+				},
+				rotation = 0,
+				rotationRate = 0.014,
+				speed = Random.nextGaussian(50, 20),
+				direction = Vector2d.vectorFromAngle(Random.nextGaussian(Math.PI, Math.PI)),
+				visible = true;
+
+			var	ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
+			ast.type = EXPD.Entities.ASTEROID_LRG;
+			return ast;
+			break;
+	}
+}
+
+
+
+EXPD.setExplosionFlash = function(_flashType, _flashCenter) {
+
+
+	switch(_flashType){
+
+		case EXPD.Flash.baseFlash:
+
+			var id = EXPD.GameParameters.flashUniqueId;
+			EXPD.flashes[id] = Spec.create(EXPD.images['images/plasmaCenterFlash.png'], 400, 400, _flashCenter, 0);
+			EXPD.GameParameters.flashUniqueId++;
+			break;
+
+		case EXPD.Flash.friendlyShipExplosionFlash:
+
+			var id = EXPD.GameParameters.flashUniqueId;
+			EXPD.flashes[id] = Spec.create(EXPD.images['images/friendlyExplosionFlash.png'], 800, 800, _flashCenter, 0);
+			EXPD.GameParameters.flashUniqueId++;
+			break;
+
+	}
 };
 
 
 
 
-EXPD.initializeExplosion = function(args){
+EXPD.initializeExplosion = function(explosionType, explposionCenter){
 
 	// INTERFACE:
+	// ExplosionType : { baseExplosion, friendlyShipExplosion, enemyShipExplosion, enemyMissileExplosion }
 	// ImageSet(_fire, _smoke, _plasma, _debryBase, _debryShip, _debryEnemyShip, _debryMissiles)
 	///////
-	var imgs = ExplosionFactory.ImageSet(
+	var imgs = {},
+		exp;
 
-		EXPD.images['images/fireBig.png'],
-		EXPD.images['images/smoke.png'],
-		EXPD.images['images/plasma.png'],
-		EXPD.images['images/cartoonishBubble.png'],
-		EXPD.images['images/commet.png'],
-		null
-	);
+	switch(explosionType){
 
-	// Initialize explosion, tag, and bag.
-	var exp = ExplosionFactory.create(ExplosionFactory.ExplosionType.baseExplosion, imgs, EXPD.graphics, 2, args.midpoint);
-	EXPD.explosions[exp.id] = exp;
+		case ExplosionFactory.ExplosionType.baseExplosion:
+			
+			imgs = ExplosionFactory.ImageSet(
 
-	/// TODO : other explosions ... also, this one is pretty crappy.
+				EXPD.images['images/fireBig.png'],
+				EXPD.images['images/smoke.png'],
+				EXPD.images['images/plasma.png'],
+				EXPD.images['images/cartoonishBubble.png'],
+				null,
+				null
+			);
+
+			// Initialize explosion, tag, and bag.
+			exp = ExplosionFactory.create(ExplosionFactory.ExplosionType.baseExplosion, imgs, EXPD.graphics, 2, explposionCenter);
+			EXPD.explosions[exp.id] = exp;
+			break;
+
+		case ExplosionFactory.ExplosionType.friendlyShipExplosion:
+
+			imgs = ExplosionFactory.ImageSet(
+
+				EXPD.images['images/fireBig.png'],
+				EXPD.images['images/smoke.png'],
+				EXPD.images['images/plasma.png'],
+				EXPD.images['images/cartoonishBubble.png'],
+				EXPD.images['images/commet.png'],
+				null
+			);
+
+			// Initialize explosion, tag, and bag.
+			exp = ExplosionFactory.create(ExplosionFactory.ExplosionType.friendlyShipExplosion, imgs, EXPD.graphics, 2, explposionCenter);
+			EXPD.explosions[exp.id] = exp;
+			break;
+
+		// TODO: more
+
+	}
+
+	
 };
 
 
@@ -281,7 +432,7 @@ EXPD.collisionDetection = function(){
 	// kill the asteroid ... temporarily, of course. ... with an exp .. testing
 	function collisionStrategy_exp(ntt1, ntt2){
 
-		if(ntt1.type === 'asteroid_medium'){
+		if(ntt1.type === EXPD.Entities.ASTEROID_MED){
 			ntt1.visible = false;
 		}
 		else{
@@ -290,34 +441,105 @@ EXPD.collisionDetection = function(){
 
 
 		// If the ntts are here, (1) they collide, (2) they are visible.
-		EXPD.setExplosionFlash({midpoint : Vector2d.midPoint(ntt1.center, ntt2.center)});
-		EXPD.initializeExplosion({midpoint : Vector2d.midPoint(ntt1.center, ntt2.center)});
+		// BROKEN ...
+
+		EXPD.setExplosionFlash(EXPD.Flash.baseFlash, Vector2d.midPoint(ntt1.center, ntt2.center));
+		EXPD.initializeExplosion(ExplosionFactory.ExplosionType.baseExplosion, Vector2d.midPoint(ntt1.center, ntt2.center));
 
 	}
 
 
-	function collisionStrategy_exp2()
+	////
+	// Interface: ntt element has the following data members: .width, .height, .center
+	///
+	function collisionStrategy_shipCrash(ntt1, ntt2)
 	{
-		// test simultaneous exps
-		EXPD.initializeExplosion({midpoint : {x: 100, y:100}});
-		EXPD.initializeExplosion({midpoint : {x: 200, y:200}});
-		EXPD.initializeExplosion({midpoint : {x: 300, y:300}});
-		EXPD.initializeExplosion({midpoint : {x: 400, y:400}});
+		// 	if this is last life
+		//		then 
+		//			gameOver
+		//	else if there are more than one life remaining 
+		//		then 
+		//			shipCrash : Menu : TODO
+		//			make safe
+
+		// TODO: make the ship temporarily invisible
+
+		var tempShip = {};
+		if(ntt1.type = EXPD.Entities.SHIP_FRIENDLY){
+
+			tempShip = ntt1;
+		}
+		else {
+
+			tempShip = ntt2;
+		}
+
+
+		if(EXPD.GameParameters.currentLife === 'fixThisLogic'){
+
+			EXPD.gameOver();
+		}
+		else {
+
+			EXPD.GameParameters.currentLife--;
+
+
+			EXPD.setExplosionFlash(EXPD.Flash.friendlyShipExplosionFlash, { x : tempShip.center.x, y : tempShip.center.y - tempShip.height});
+			EXPD.initializeExplosion(ExplosionFactory.ExplosionType.friendlyShipExplosion, Vector2d.midPoint(ntt1.center, ntt2.center));
+			
+			EXPD.makeShipSafe();
+		}
+
+
 	}
 
 
+	//////
+	//
+	// Requires : CollisionDetector.js
+	//
+	//////
 
-	// CollisionDetector.js
-	CollisionDetector.detectCollisions(EXPD.ship, EXPD.asteroids, collisionStrategy_exp);
+
+	// if ship is not safe, check for collisions.
+
+	// NOTE: wron logic for debuggin ............ TODO: NEGATE
+	if(!EXPD.GameParameters.shipIsSafe){
+		
+		CollisionDetector.detectCollisions(EXPD.ship, EXPD.asteroids, collisionStrategy_shipCrash);
+	}
+
+
+	// Always check for friendly missiles collisions with asteroids.
 	CollisionDetector.detectCollisions(EXPD.friendlyMissles, EXPD.asteroids, collisionStrategy_exp);
 
 };
 
 
 
+
+
 EXPD.update = function(elapsedTime, canvasDim){
 
 	EXPD.keyboard.update(elapsedTime, canvasDim);
+
+
+	// Update ship status
+	if(EXPD.GameParameters.shipIsSafe){
+
+		if (EXPD.GameParameters.safetyPeriodCountDown > 0){
+
+			EXPD.GameParameters.safetyPeriodCountDown -= elapsedTime;			
+		}
+		else {
+
+			EXPD.GameParameters.shipIsSafe = false;
+		}
+
+	}
+
+
+	// Udate ship movement
 	EXPD.ship[0].update(elapsedTime, canvasDim);
 
 
