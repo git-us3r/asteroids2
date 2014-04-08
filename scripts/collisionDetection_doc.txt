@@ -1,0 +1,101 @@
+//
+// COLLISION of V and U.
+//
+// Objects U and V collide if the distance between the centers is at least equal to max( w, l ).
+/////
+
+Collision elements: 
+
+the ship collides with:
+
+	1. asteroids
+	2. Enemy projectiles
+
+the asteroids collide with:
+
+	1. ship (redundancy)
+	2. friendly projectiles
+
+
+ALGORITHM:
+
+	There should be:
+		 1 array of asteroids and enemy ships 	// any of which collides with ship.
+		 1 array of friendly projectiles
+		 1 array of enemy projectiles
+
+	Check for collisions between the ship and (i) asteroids, (ii) enemy ships, (iii) enemy projectiles
+
+	Check for collisions between the friendly projectiles and (i) asteroids, (ii) enemey ships, (iii) enemy projectiles [ it would be cool but idk if it is allowed or rquired. ]
+
+	Separating the checks might help clearify the logic: If the checks are performed in separate for loops, in the body, one condition needs to be checked. If a collision exists, the colliding entities need not be checked (the checking occurs explicitly by separating the test loops.)
+
+
+{
+	
+	// Check for ship-* collisions
+	// Semantics: ship is destroyed
+	////
+
+	enemyEntities  = mergeArrays(asteroids, enemyShips, enemyProjectiles);		// array
+
+	for each (var enemy in enemeyEntities ){
+
+		var distanceV = Vector2d.subtract(ship.center, enemy.center),
+			distanceMag = Vector2d.magnitude(distanceV),
+			minDistance = Math.max(Math.max(ship.width, ship.height), Math.max(enemy.width, enemy.length));
+
+		if ( distanceMag <= minDistance ) {
+
+			// Execution strategy
+			destroy(enemy);
+			destroy(ship);
+
+			GAME.shipDestroyed();	// TODO ...
+
+		}
+	}
+
+
+	// Check for friendlyProjectiles-* collisions
+	// Semantics: Enemy entity is destroyed.
+	////
+
+	for each (var friendlyProjectile in friendlyProjectiles ){
+
+		for each (var enemy in enemeyEntities ){
+
+			var distanceV = Vector2d.subtract(friendlyProjectile.center, enemy.center),
+				distanceMag = Vector2d.magnitude(distanceV),
+				minDistance = Math.max(Math.max(friendlyProjectile.width, friendlyProjectile.height), Math.max(enemy.width, enemy.length));
+
+			if ( distanceMag <= minDistance ) {
+
+				// Execution strategy
+				destroy(enemy);
+				destory(friendlyProjectile);
+			}
+		}
+	}	
+}
+// END: collision detection
+
+
+
+ALGORITHM: destroy(element)
+
+	element.visible = false;
+	setExplosion(element.type, element.center);
+
+
+
+
+mmhh... Pattern?
+
+The collision detector should be abstracted away from the colliding elements.
+The collisions are represented by vectors. So, detection can be implemented by the GAME
+using the a function of the vector library.
+
+Then collsision detection boils down to a function call. However there must be an entity which manages the items compared and notifies abt it.
+The collision detection agent receives an 
+
