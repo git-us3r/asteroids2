@@ -99,7 +99,7 @@ var ExplosionFactory = (function(){
 				speed_mean : 500,
 				lifetime_mean : .9,
 				lifetime_std : 1,
-				genRate : 30
+				genRate : 20
 			};
 		}
 
