@@ -1,5 +1,6 @@
 var EXPD = {
 	images : {},
+	screens : {},
 
 	status : {
 		preloadRequest : 0,
@@ -44,7 +45,12 @@ window.addEventListener('load', function() {
 				'preload!scripts/Explosion.js',
 				'preload!scripts/ExplosionFactory.js',
 				'preload!scripts/CollisionDetector.js',
-				'preload!scripts/Game.js'
+				'preload!scripts/AsteroidsGame.js',
+				'preload!scripts/game.js',
+				'preload!scripts/mainmenu.js',
+				'preload!scripts/highscores.js',
+				'preload!scripts/help.js',
+				'preload!scripts/about.js',
 			],
 			complete : function() {
 				console.log('All files requested for loading...');
@@ -78,7 +84,7 @@ yepnope.addPrefix('preload', function(resource) {
 		// When everything has finished preloading, go ahead and start the EXPD
 		if (EXPD.status.preloadComplete === EXPD.status.preloadRequest) {
 			console.log('Preloading complete!');
-			EXPD.initialize();
+			EXPD.game.initialize();
 		}
 	};
 	
