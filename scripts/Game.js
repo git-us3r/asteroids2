@@ -50,11 +50,15 @@ EXPD.GameParameters = {
 };
 
 
+
+
+
 EXPD.gameOver = function(){
 
 	// TODO
 
 };
+
 
 
 
@@ -69,6 +73,43 @@ EXPD.makeShipSafe = function(){
 	// NOTE: EXPD.update will validate safety period and terminate it when appropriate.
 
 }
+
+
+
+
+
+EXPD.breakAsteroid = function(_AstType, _location) {
+
+	switch(_AstType){
+
+		case EXPD.Entities.ASTEROID_LRG:
+
+			for(var i = 0; i < EXPD.GameParameters.large2MedRatio; i++) {
+
+				var tempAst = EXPD.setAsteroid(EXPD.Entities.ASTEROID_MED, _location);
+				EXPD.asteroids[tempAst.id] = tempAst;
+			}
+
+		break;
+
+		case EXPD.Entities.ASTEROID_MED:
+
+			for(var i = 0; i < EXPD.GameParameters.med2Smallratio; i++) {
+
+				var tempAst = EXPD.setAsteroid(EXPD.Entities.ASTEROID_SML, _location);
+				EXPD.asteroids[tempAst.id] = tempAst;
+			}
+
+			
+		break;
+
+		default:
+			break;		// Nothing to do if its small.
+
+	}
+
+};
+
 
 
 
@@ -218,30 +259,45 @@ EXPD.initialize = function(){
 
 
 
-EXPD.setAsteroid = function (entitySize){
+EXPD.setAsteroid = function (_entitySize, _location){
 
-	switch(entitySize){
+	var tempLocation = _location || null;
+
+	switch(_entitySize){
 
 		case EXPD.Entities.ASTEROID_LRG:
 			//Asteroid(_image, _width, _height, _center, _rotation)
 			var image = EXPD.images['images/cartoonishBigRockPurp.png'],
 				width = EXPD.GameParameters.sizeOfLargeAsteroids,
 				height = EXPD.GameParameters.sizeOfLargeAsteroids,
-				//
-				// Random is bad: what if there is a collision at time t = 0?
-				// TODO: fix.
-				center = {
-					x: Random.nextRange(width, EXPD.canvas.width - width), 
-					y: Random.nextRange(height, EXPD.canvas.height - height)
-				},
 				rotation = 0,
 				rotationRate = 0.014,
 				speed = Random.nextGaussian(50, 20),
 				direction = Vector2d.vectorFromAngle(Random.nextGaussian(Math.PI, Math.PI)),
-				visible = true;
+				visible = true,
+				ast = {},
+				center = {};
 
-			var	ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
+				if(tempLocation !== null) {
+
+					center = _location;
+
+				}
+				else {
+
+					//
+					// Random is bad: what if there is a collision at time t = 0?
+					// TODO: fix.
+					center = {
+						x: Random.nextRange(width, EXPD.canvas.width - width), 
+						y: Random.nextRange(height, EXPD.canvas.height - height)
+					};
+				}
+				
+
+			ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
 			ast.type = EXPD.Entities.ASTEROID_LRG;
+
 			return ast;
 			break;				// superfluous
 
@@ -250,46 +306,72 @@ EXPD.setAsteroid = function (entitySize){
 			var image = EXPD.images['images/cartoonishMedRockPurp.png'],
 				width = EXPD.GameParameters.sizeOfMedAsteroids,
 				height = EXPD.GameParameters.sizeOfMedAsteroids,
-				//
-				// Random is bad: what if there is a collision at time t = 0?
-				// TODO: fix.
-				center = {
-					x: Random.nextRange(width, EXPD.canvas.width - width), 
-					y: Random.nextRange(height, EXPD.canvas.height - height)
-				},
 				rotation = 0,
 				rotationRate = 0.014,
 				speed = Random.nextGaussian(50, 20),
 				direction = Vector2d.vectorFromAngle(Random.nextGaussian(Math.PI, Math.PI)),
-				visible = true;
+				visible = true,
+				ast = {},
+				center = {};
 
-			var	ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
-			ast.type = EXPD.Entities.ASTEROID_LRG;
+				if(tempLocation !== null) {
+
+					center = _location;
+
+				}
+				else {
+
+					//
+					// Random is bad: what if there is a collision at time t = 0?
+					// TODO: fix.
+					center = {
+						x: Random.nextRange(width, EXPD.canvas.width - width), 
+						y: Random.nextRange(height, EXPD.canvas.height - height)
+					};
+				}
+				
+
+			ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
+			ast.type = EXPD.Entities.ASTEROID_MED;
+
 			return ast;
-			break;
+			break;				// superfluous
 
 		case EXPD.Entities.ASTEROID_SML:
 			//Asteroid(_image, _width, _height, _center, _rotation)
 			var image = EXPD.images['images/cartoonishSmallRockPurp.png'],
 				width = EXPD.GameParameters.sizeOfSmallAsteroids,
 				height = EXPD.GameParameters.sizeOfSmallAsteroids,
-				//
-				// Random is bad: what if there is a collision at time t = 0?
-				// TODO: fix.
-				center = {
-					x: Random.nextRange(width, EXPD.canvas.width - width), 
-					y: Random.nextRange(height, EXPD.canvas.height - height)
-				},
 				rotation = 0,
 				rotationRate = 0.014,
 				speed = Random.nextGaussian(50, 20),
 				direction = Vector2d.vectorFromAngle(Random.nextGaussian(Math.PI, Math.PI)),
-				visible = true;
+				visible = true,
+				ast = {},
+				center = {};
 
-			var	ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
-			ast.type = EXPD.Entities.ASTEROID_LRG;
+				if(tempLocation !== null) {
+
+					center = _location;
+
+				}
+				else {
+
+					//
+					// Random is bad: what if there is a collision at time t = 0?
+					// TODO: fix.
+					center = {
+						x: Random.nextRange(width, EXPD.canvas.width - width), 
+						y: Random.nextRange(height, EXPD.canvas.height - height)
+					};
+				}
+				
+
+			ast = Asteroid.create(image, width, height, center, rotation, rotationRate, speed, direction, visible);
+			ast.type = EXPD.Entities.ASTEROID_SML;
+
 			return ast;
-			break;
+			break;				// superfluous
 	}
 }
 
@@ -432,28 +514,40 @@ EXPD.collisionDetection = function(){
 	// kill the asteroid ... temporarily, of course. ... with an exp .. testing
 	function collisionStrategy_exp(ntt1, ntt2){
 
-		if(ntt1.type === EXPD.Entities.ASTEROID_MED){
-			ntt1.visible = false;
+		var tempAst = {};
+
+		if(ntt1.type === EXPD.Entities.MISSLE_FRIENDLY){
+			
+			tempAst = ntt2;
 		}
 		else{
-			ntt2.visible = false;
+
+			tempAst = ntt1;
 		}
 
+		// Remove elements (kindda)
+		ntt1.visible = false;
+		ntt2.visible = false;
 
-		// If the ntts are here, (1) they collide, (2) they are visible.
-		// BROKEN ...
 
+		// Visual effects (flash, explosion).
 		EXPD.setExplosionFlash(EXPD.Flash.baseFlash, Vector2d.midPoint(ntt1.center, ntt2.center));
 		EXPD.initializeExplosion(ExplosionFactory.ExplosionType.baseExplosion, Vector2d.midPoint(ntt1.center, ntt2.center));
 
+
+		// Process asteroid to determine if new asteroids must be added to the set.
+		EXPD.breakAsteroid(tempAst.type, tempAst.center);
+
 	}
+
+
+
 
 
 	////
 	// Interface: ntt element has the following data members: .width, .height, .center
 	///
-	function collisionStrategy_shipCrash(ntt1, ntt2)
-	{
+	function collisionStrategy_shipCrash(ntt1, ntt2) {
 		// 	if this is last life
 		//		then 
 		//			gameOver
